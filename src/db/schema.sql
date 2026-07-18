@@ -163,13 +163,12 @@ CREATE TABLE audit_logs (
 -- SEED DATA
 -- ==========================================
 
--- Seed Users (Bcrypt hashes correspond to passwords like admin123, staff123, driver123)
--- Hash generated using bcrypt cost 10: $2a$10$92IXMTDXPZ.26q.gH5K6D.vSjU7Jg8q5B.gP0wE6bN8Zp4726tW.y -> 'admin123'
+-- Seed Users (admin -> admin123, staff -> staff123, drivers -> driver123)
 INSERT INTO users (id, name, email, mobile, password_hash, role, status) VALUES
-(1, 'System Admin', 'admin@ganeshtransport.com', '9000000000', '$2a$10$92IXMTDXPZ.26q.gH5K6D.vSjU7Jg8q5B.gP0wE6bN8Zp4726tW.y', 'admin', 1),
-(2, 'Office Staff User', 'staff@ganeshtransport.com', '9000000008', '$2a$10$92IXMTDXPZ.26q.gH5K6D.vSjU7Jg8q5B.gP0wE6bN8Zp4726tW.y', 'officeStaff', 1),
-(3, 'Regular Driver', 'driver1@ganeshtransport.com', '9000000001', '$2a$10$92IXMTDXPZ.26q.gH5K6D.vSjU7Jg8q5B.gP0wE6bN8Zp4726tW.y', 'driver', 1),
-(4, 'Second Driver', 'driver2@ganeshtransport.com', '9000000002', '$2a$10$92IXMTDXPZ.26q.gH5K6D.vSjU7Jg8q5B.gP0wE6bN8Zp4726tW.y', 'driver', 1);
+(1, 'System Admin', 'admin@ganeshtransport.com', '9000000000', '$2a$10$QmbsaXsxAlUcItIu..c2Cuo0.qah6EhXQwYZVEpVhMbvMBeLQhYP.', 'admin', 1),
+(2, 'Office Staff User', 'staff@ganeshtransport.com', '9000000008', '$2a$10$mvofNIqtRs8s7vrWhWmpcOWGs6ERTo0tpxKw2HsnE78G1SShlMSry', 'officeStaff', 1),
+(3, 'Regular Driver', 'driver1@ganeshtransport.com', '9000000001', '$2a$10$19KiCFhxjEH8byVKgAkQj.ALgsfUiNKwM8K0LLrW4B1ukJmtDpoAO', 'driver', 1),
+(4, 'Second Driver', 'driver2@ganeshtransport.com', '9000000002', '$2a$10$19KiCFhxjEH8byVKgAkQj.ALgsfUiNKwM8K0LLrW4B1ukJmtDpoAO', 'driver', 1);
 
 -- Seed Buses
 INSERT INTO buses (id, number, model, capacity, insurance_expiry, fitness_expiry, permit_expiry, puc_expiry, status) VALUES
