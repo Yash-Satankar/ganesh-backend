@@ -19,6 +19,10 @@ app.get('/health', (req, res) => {
   res.status(200).json({ success: true, message: 'Server is healthy' });
 });
 
+app.get('/', (req, res) => {
+  res.status(200).json({ success: true, message: 'Ganesh Transport API is running' });
+});
+
 // Bind API routes
 app.use('/api', apiRoutes);
 
