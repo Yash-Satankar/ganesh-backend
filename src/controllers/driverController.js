@@ -45,7 +45,7 @@ export const getDriverById = async (req, res, next) => {
 // @route   POST /api/drivers
 // @access  Private/OfficeStaff/Admin
 export const createDriver = async (req, res, next) => {
-  const { name, mobile, licenseNumber, licenseExpiry, assignedBusId, monthlySalary } = req.body;
+  const { name, mobile, licenseNumber, licenseExpiry, assignedBusId, monthlySalary, joiningDate, emergencyContact } = req.body;
 
   if (!name || !mobile || !licenseNumber || !licenseExpiry || !monthlySalary) {
     return res.status(400).json({ success: false, message: 'Required fields are missing' });
@@ -59,8 +59,8 @@ export const createDriver = async (req, res, next) => {
     }
 
     const sql = `
-      INSERT INTO drivers (name, mobile, license_number, license_expiry, assigned_bus_id, monthly_salary)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO drivers (name, mobile, license_number, license_expiry, assigned_bus_id, monthly_salary, joining_date, emergency_contact)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const [result] = await pool.query(sql, [
       name,
@@ -68,7 +68,9 @@ export const createDriver = async (req, res, next) => {
       licenseNumber,
       licenseExpiry,
       assignedBusId || null,
-      monthlySalary
+      monthlySalary,
+      joiningDate || null,
+      emergencyContact || null
     ]);
 
     const newDriverId = result.insertId;
@@ -81,7 +83,9 @@ export const createDriver = async (req, res, next) => {
       licenseNumber,
       licenseExpiry,
       assignedBusId: assignedBusId || null,
-      monthlySalary
+      monthlySalary,
+      joiningDate,
+      emergencyContact
     };
 
     await logAudit(null, {
@@ -105,7 +109,7 @@ export const createDriver = async (req, res, next) => {
 // @access  Private/OfficeStaff/Admin
 export const updateDriver = async (req, res, next) => {
   const { id } = req.params;
-  const { name, mobile, licenseNumber, licenseExpiry, assignedBusId, monthlySalary } = req.body;
+  const { name, mobile, licenseNumber, licenseExpiry, assignedBusId, monthlySalary, joiningDate, emergencyContact } = req.body;
 
   try {
     const [oldRows] = await pool.query('SELECT * FROM drivers WHERE id = ? AND status = 1', [id]);
@@ -116,7 +120,7 @@ export const updateDriver = async (req, res, next) => {
 
     const sql = `
       UPDATE drivers 
-      SET name = ?, mobile = ?, license_number = ?, license_expiry = ?, assigned_bus_id = ?, monthly_salary = ?
+      SET name = ?, mobile = ?, license_number = ?, license_expiry = ?, assigned_bus_id = ?, monthly_salary = ?, joining_date = ?, emergency_contact = ?
       WHERE id = ?
     `;
     await pool.query(sql, [
@@ -126,6 +130,8 @@ export const updateDriver = async (req, res, next) => {
       licenseExpiry || oldValues.license_expiry,
       assignedBusId !== undefined ? assignedBusId : oldValues.assigned_bus_id,
       monthlySalary || oldValues.monthly_salary,
+      joiningDate !== undefined ? joiningDate : oldValues.joining_date,
+      emergencyContact !== undefined ? emergencyContact : oldValues.emergency_contact,
       id
     ]);
 

@@ -48,7 +48,7 @@ export const getTrips = async (req, res, next) => {
 // @route   POST /api/trips
 // @access  Private/OfficeStaff/Admin
 export const createTrip = async (req, res, next) => {
-  const { date, companyId, shiftRouteId, busId, driverId, kilometers, amount } = req.body;
+  const { date, companyId, shiftRouteId, busId, driverId, kilometers, amount, startTime, endTime } = req.body;
 
   if (!date || !companyId || !shiftRouteId || !busId || !driverId || kilometers === undefined || amount === undefined) {
     return res.status(400).json({ success: false, message: 'All fields are required' });
@@ -66,10 +66,10 @@ export const createTrip = async (req, res, next) => {
     }
 
     const sql = `
-      INSERT INTO trips (date, company_id, shift_route_id, bus_id, driver_id, kilometers, amount)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO trips (date, company_id, shift_route_id, bus_id, driver_id, kilometers, amount, start_time, end_time)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    const [result] = await pool.query(sql, [date, companyId, shiftRouteId, busId, driverId, kilometers, amount]);
+    const [result] = await pool.query(sql, [date, companyId, shiftRouteId, busId, driverId, kilometers, amount, startTime || null, endTime || null]);
 
     const newTripId = result.insertId;
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -87,7 +87,9 @@ export const createTrip = async (req, res, next) => {
       driverId,
       driverName: driver[0].name,
       kilometers,
-      amount
+      amount,
+      startTime,
+      endTime
     };
 
     await logAudit(null, {

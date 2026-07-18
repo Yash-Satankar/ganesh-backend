@@ -45,7 +45,7 @@ export const getBusById = async (req, res, next) => {
 // @route   POST /api/buses
 // @access  Private/OfficeStaff/Admin
 export const createBus = async (req, res, next) => {
-  const { number, model, capacity, insuranceExpiry, fitnessExpiry, permitExpiry, pucExpiry } = req.body;
+  const { number, model, capacity, insuranceExpiry, fitnessExpiry, permitExpiry, pucExpiry, chassisNumber, engineNumber, manufactureYear } = req.body;
 
   if (!number || !model || !capacity || !insuranceExpiry || !fitnessExpiry || !permitExpiry || !pucExpiry) {
     return res.status(400).json({ success: false, message: 'All fields are required' });
@@ -59,8 +59,8 @@ export const createBus = async (req, res, next) => {
     }
 
     const sql = `
-      INSERT INTO buses (number, model, capacity, insurance_expiry, fitness_expiry, permit_expiry, puc_expiry)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO buses (number, model, capacity, insurance_expiry, fitness_expiry, permit_expiry, puc_expiry, chassis_number, engine_number, manufacture_year)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const [result] = await pool.query(sql, [
       number,
@@ -69,13 +69,16 @@ export const createBus = async (req, res, next) => {
       insuranceExpiry,
       fitnessExpiry,
       permitExpiry,
-      pucExpiry
+      pucExpiry,
+      chassisNumber || null,
+      engineNumber || null,
+      manufactureYear || null
     ]);
 
     const newBusId = result.insertId;
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-    const newBusData = { id: newBusId, number, model, capacity, insuranceExpiry, fitnessExpiry, permitExpiry, pucExpiry };
+    const newBusData = { id: newBusId, number, model, capacity, insuranceExpiry, fitnessExpiry, permitExpiry, pucExpiry, chassisNumber, engineNumber, manufactureYear };
 
     await logAudit(null, {
       userId: req.user.id,
@@ -98,7 +101,7 @@ export const createBus = async (req, res, next) => {
 // @access  Private/OfficeStaff/Admin
 export const updateBus = async (req, res, next) => {
   const { id } = req.params;
-  const { number, model, capacity, insuranceExpiry, fitnessExpiry, permitExpiry, pucExpiry } = req.body;
+  const { number, model, capacity, insuranceExpiry, fitnessExpiry, permitExpiry, pucExpiry, chassisNumber, engineNumber, manufactureYear } = req.body;
 
   try {
     // Get old values
@@ -110,7 +113,7 @@ export const updateBus = async (req, res, next) => {
 
     const sql = `
       UPDATE buses 
-      SET number = ?, model = ?, capacity = ?, insurance_expiry = ?, fitness_expiry = ?, permit_expiry = ?, puc_expiry = ?
+      SET number = ?, model = ?, capacity = ?, insurance_expiry = ?, fitness_expiry = ?, permit_expiry = ?, puc_expiry = ?, chassis_number = ?, engine_number = ?, manufacture_year = ?
       WHERE id = ?
     `;
     await pool.query(sql, [
@@ -121,6 +124,9 @@ export const updateBus = async (req, res, next) => {
       fitnessExpiry || oldValues.fitness_expiry,
       permitExpiry || oldValues.permit_expiry,
       pucExpiry || oldValues.puc_expiry,
+      chassisNumber !== undefined ? chassisNumber : oldValues.chassis_number,
+      engineNumber !== undefined ? engineNumber : oldValues.engine_number,
+      manufactureYear !== undefined ? manufactureYear : oldValues.manufacture_year,
       id
     ]);
 

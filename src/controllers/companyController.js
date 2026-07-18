@@ -33,7 +33,7 @@ export const getCompanyById = async (req, res, next) => {
 // @route   POST /api/companies
 // @access  Private/OfficeStaff/Admin
 export const createCompany = async (req, res, next) => {
-  const { name, contactPerson, mobile, billingType, rate } = req.body;
+  const { name, contactPerson, mobile, billingType, rate, email, gstNumber } = req.body;
 
   if (!name || !contactPerson || !mobile || !billingType || rate === undefined) {
     return res.status(400).json({ success: false, message: 'All fields are required' });
@@ -46,15 +46,15 @@ export const createCompany = async (req, res, next) => {
     }
 
     const sql = `
-      INSERT INTO companies (name, contact_person, mobile, billing_type, rate)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO companies (name, contact_person, mobile, billing_type, rate, email, gst_number)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    const [result] = await pool.query(sql, [name, contactPerson, mobile, billingType, rate]);
+    const [result] = await pool.query(sql, [name, contactPerson, mobile, billingType, rate, email || null, gstNumber || null]);
 
     const newCompanyId = result.insertId;
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-    const newCompanyData = { id: newCompanyId, name, contactPerson, mobile, billingType, rate };
+    const newCompanyData = { id: newCompanyId, name, contactPerson, mobile, billingType, rate, email, gstNumber };
 
     await logAudit(null, {
       userId: req.user.id,
@@ -77,7 +77,7 @@ export const createCompany = async (req, res, next) => {
 // @access  Private/OfficeStaff/Admin
 export const updateCompany = async (req, res, next) => {
   const { id } = req.params;
-  const { name, contactPerson, mobile, billingType, rate } = req.body;
+  const { name, contactPerson, mobile, billingType, rate, email, gstNumber } = req.body;
 
   try {
     const [oldRows] = await pool.query('SELECT * FROM companies WHERE id = ? AND status = 1', [id]);
@@ -88,7 +88,7 @@ export const updateCompany = async (req, res, next) => {
 
     const sql = `
       UPDATE companies 
-      SET name = ?, contact_person = ?, mobile = ?, billing_type = ?, rate = ?
+      SET name = ?, contact_person = ?, mobile = ?, billing_type = ?, rate = ?, email = ?, gst_number = ?
       WHERE id = ?
     `;
     await pool.query(sql, [
@@ -97,6 +97,8 @@ export const updateCompany = async (req, res, next) => {
       mobile || oldValues.mobile,
       billingType || oldValues.billing_type,
       rate !== undefined ? rate : oldValues.rate,
+      email !== undefined ? email : oldValues.email,
+      gstNumber !== undefined ? gstNumber : oldValues.gst_number,
       id
     ]);
 
